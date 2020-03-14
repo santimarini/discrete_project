@@ -1,0 +1,1 @@
+gcc -Wall -Wextra -O3 -std=c99 veinteveinte.c main.c 
