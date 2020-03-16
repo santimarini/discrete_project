@@ -7,41 +7,52 @@
 
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
 Grafo ConstruccionDelGrafo(){
-	Grafo G;
-	G = malloc(sizeof(Grafo));
-	if(G==NULL){
-		perror("No se pudo reservar memoria");
-	}
 	FILE *fp;
-	fp = fopen ( "anna.txt", "rb" );
-	if (fp==NULL) {perror("No se pudo abrir el archivo"); exit (1);}
-	char letra;
-	char *edge;
+	fp = fopen ("anna.txt", "rb");
+	Grafo G;
+	G = (Grafo) malloc(sizeof(Grafo));
+	
+	if (fp == NULL) {
+		fprintf(stderr, "No se pudo abrir el archivo\n"); 
+		return NULL;
+	}
+
+	if(G == NULL){
+		fprintf(stderr, "Fallo al reservar memoria\n");
+		return NULL;
+	}
 	u32 vertices, lados, vertice1, vertice2, anteriorvertice;
+	char linea[FILE_LINE_MAX_SIZE];
+	char letra;
+	char *edge = NULL;
 	int i = 0, j = 0;
-	while(feof(fp)==0){
-		letra = fgetc(fp);
+
+	while(fgets(linea, sizeof(linea), fp) != NULL){
+		letra = linea[0];
+
+	//⬆⬆⬆ hasta acá andando joya ⬆⬆⬆//
+
 		if(letra == 'p'){
-			fscanf(fp, "%c%s%d%d", &letra,edge,&vertices,&lados);
+			/*VER parseo de linea = "p edge 138 493" a algo como linea_parseada= ["p", "edge", "138", "493"](con strtok, lío),
+			 no se me ocurre otra cosa;	vertice = (u32) linea_parseada[2]  */
+
 			G->nVertices = vertices;
 			G->nLados = lados;
 			letra = '\n';
 			edge = NULL;
 
-		}
-
-		else if(letra == 'e'){
+		}else if(letra == 'e'){
 			anteriorvertice = vertice1;
-			fscanf(fp, "%c%d%d", &letra,&vertice1,&vertice2);
-			letra='\n';
-			if(vertice1!=anteriorvertice){
-				G->orden[i]=vertice1;
-				G->vertices[i].nombre=vertice1;
-				G->vertices[i].vecinos[j]=vertice2;
+			fscanf(fp, "%c%d%d", &letra, &vertice1, &vertice2);
+			letra = '\n';
+			if(vertice1 != anteriorvertice){
+				G->orden[i] = vertice1;
+				G->vertices[i].nombre = vertice1;
+				G->vertices[i].vecinos[j] = vertice2;
 				j++;
 			}
-			if(vertice1==anteriorvertice){
-				G->vertices[i].vecinos[j]=vertice2;
+			if(vertice1 == anteriorvertice){
+				G->vertices[i].vecinos[j] = vertice2;
 				j++;
 			}
 			i++;
@@ -57,14 +68,13 @@ Grafo ConstruccionDelGrafo(){
 	}
 	u32 delta = 0;
 	for(u32 k = 0; k < G->nVertices; k++) {
-		if(G->vertices[k].grado>delta){
+		if(G->vertices[k].grado > delta){
 			delta = G->vertices[k].grado;
 		}
 	}
 	G->delta = delta;
-
-
 	fclose(fp);
+	
 	return G;
 }
 
@@ -74,12 +84,12 @@ Grafo ConstruccionDelGrafo(){
 // -- FUNCIONES PARA EXTRAER INFORMACION DEL GRAFO --
 
 u32 NumeroDeVertices(Grafo G){
-	assert(G!=NULL);
+	assert(G != NULL);
 	return(G->nVertices);
 }
 
 u32 NumeroDeLados(Grafo G){
-	assert(G!=NULL);
+	assert(G != NULL);
 	return(G->nLados);
 }
 

@@ -19,6 +19,6 @@ struct VerticeSt {
     u32 color;
     u32 *vecinos; // es de tipo u32 solo necesitamos el nombre, luego buscar en el arreglo de vertices
 };
-typedef struct VerticeSt *Vertice;
+
 
 #endif

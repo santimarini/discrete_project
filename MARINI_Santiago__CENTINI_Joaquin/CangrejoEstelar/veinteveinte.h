@@ -1,6 +1,6 @@
 #ifndef __vv_H
 #define __vv_H
-
+#define FILE_LINE_MAX_SIZE 100
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +11,8 @@
 
 //Grafo es un puntero a una estructura, la cual esta definida en el .h de arriba
 
-typedef GrafoSt *Grafo;
-
+typedef struct GrafoSt *Grafo;
+typedef struct VerticeSt *Vertice;
 
 //construcci'on/destrucci'on
 
