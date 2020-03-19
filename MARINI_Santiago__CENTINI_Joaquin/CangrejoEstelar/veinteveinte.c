@@ -41,12 +41,22 @@ Grafo ConstruccionDelGrafo(){
 	}
 	i = 0;
 	while(linea[j]!=' '){
-		seteo[i]=linea[j];
+		seteo[i] = linea[j];
 		i++;
 		j++;
 	}
 	G->nVertices = atoi(seteo);
-	printf("%u\n", G->nVertices);
+	printf("%u \n", G->nVertices);
+	i = 0;
+	j++;
+	while(linea[j]!='\n'){
+		seteo[i] = linea[j];
+		i++;
+		j++;
+	}
+	seteo[i] ='\n';
+	G->nLados = atoi(seteo);
+	printf("%u\n", G->nLados);
 
 	fclose(fp);
 
