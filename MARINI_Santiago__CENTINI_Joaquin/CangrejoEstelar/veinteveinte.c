@@ -7,13 +7,13 @@
 
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
 Grafo ConstruccionDelGrafo(){
-	FILE *fp;
-	fp = fopen ("anna.txt", "rb");
 	Grafo G;
 	G = (Grafo) malloc(sizeof(Grafo));
-	
+	FILE *fp;
+	fp = fopen ("anna.txt", "rb");
+
 	if (fp == NULL) {
-		fprintf(stderr, "No se pudo abrir el archivo\n"); 
+		fprintf(stderr, "No se pudo abrir el archivo\n");
 		return NULL;
 	}
 
@@ -23,58 +23,33 @@ Grafo ConstruccionDelGrafo(){
 	}
 	u32 vertices, lados, vertice1, vertice2, anteriorvertice;
 	char linea[FILE_LINE_MAX_SIZE];
-	char letra;
-	char *edge = NULL;
-	int i = 0, j = 0;
+	char *seteo;
+	char *letra;
 
-	while(fgets(linea, sizeof(linea), fp) != NULL){
-		letra = linea[0];
-
-	//⬆⬆⬆ hasta acá andando joya ⬆⬆⬆//
-
-		if(letra == 'p'){
-			/*VER parseo de linea = "p edge 138 493" a algo como linea_parseada= ["p", "edge", "138", "493"](con strtok, lío),
-			 no se me ocurre otra cosa;	vertice = (u32) linea_parseada[2]  */
-
-			G->nVertices = vertices;
-			G->nLados = lados;
-			letra = '\n';
-			edge = NULL;
-
-		}else if(letra == 'e'){
-			anteriorvertice = vertice1;
-			fscanf(fp, "%c%d%d", &letra, &vertice1, &vertice2);
-			letra = '\n';
-			if(vertice1 != anteriorvertice){
-				G->orden[i] = vertice1;
-				G->vertices[i].nombre = vertice1;
-				G->vertices[i].vecinos[j] = vertice2;
-				j++;
-			}
-			if(vertice1 == anteriorvertice){
-				G->vertices[i].vecinos[j] = vertice2;
-				j++;
-			}
+	do{
+		fgets(linea,FILE_LINE_MAX_SIZE,fp);
+	}while(linea[0]!='p');
+	//en este punto en linea esta : p edge vertice lados
+	//si hago un fscanf u otro fgets empiezo a leer e v1 v2
+	int i=0;
+	int j=0;
+	while(i!=2){
+		if(linea[j]==' '){
 			i++;
 		}
+		j++;
 	}
-	int tam_dato;
-	int tam_array;
-	for(u32 l = 0; l < G->nVertices; l++){
-		tam_dato = sizeof(u32);
-	 	tam_array = sizeof(G->vertices[l].vecinos);
-		G->vertices[l].grado = (u32)(tam_array/tam_dato);
+	i = 0;
+	while(linea[j]!=' '){
+		seteo[i]=linea[j];
+		i++;
+		j++;
+	}
+	G->nVertices = atoi(seteo);
+	printf("%u\n", G->nVertices);
 
-	}
-	u32 delta = 0;
-	for(u32 k = 0; k < G->nVertices; k++) {
-		if(G->vertices[k].grado > delta){
-			delta = G->vertices[k].grado;
-		}
-	}
-	G->delta = delta;
 	fclose(fp);
-	
+
 	return G;
 }
 
