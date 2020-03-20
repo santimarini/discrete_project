@@ -24,47 +24,21 @@ Grafo ConstruccionDelGrafo(){
 	u32 vertice1, vertice2;
 	char *linea=NULL;
 	int tam = 0;
-	printf("acatodobien\n");
-	if(getline(&linea,&tam,fp)==-1){
-		fprintf(stderr, "Error en elprimer getline\n");
-	}
-	printf("acatodobien\n");
-	while(linea[0]=='c'){
+	while(feof(fp)==0){
 		if(getline(&linea,&tam,fp)==-1){
-			fprintf(stderr, "Error en elprimer getline\n");
+			//fprintf(stderr, "Error en el 2 getline\n");
+			break;
 		}
-	}
-	//en este punto en linea esta : p edge vertice lados
-	//si hago un fscanf u otro fgets empiezo a leer e v1 v2
-	token = strtok(linea,c);
-	token = strtok(NULL,c);
-	token = strtok(NULL,c);
-	G->nVertices=atoi(token);
-	token = strtok(NULL,c);
-	G->nAristas = atoi(token);
-	token = strtok(NULL,c);
-	printf("%lu \n", G->nVertices);
-	printf("%lu \n", G->nAristas);
-
-
-	//seteamos el orden, por defecto natural?, verificar si esta bien
-	G->orden = calloc(G->nVertices, sizeof(u32));
-	G->vertices = calloc(G->nVertices, sizeof(struct VerticeSt));
-
-	for(int i = 0;i < (int)G->nVertices; i++){
-		G->orden[i]=i+1;
-		G->vertices[i].nombre = i+1;
-	}
-	printf("El nombre del vertice n5 del orden del grafo es: %lu\n", G->orden[5]);
-
-	for(u32 i = 0; i <= G->nAristas; i++){
-		free(linea);
-		linea = NULL;
-		tam = 0;
-		if(getline(&linea,&tam,fp) == -1){
-			fprintf(stderr, "Error en el 2 getline\n");
+		if(linea[0]=='p'){
+			token = strtok(linea,c);
+			token = strtok(NULL,c);
+			token = strtok(NULL,c);
+			G->nVertices=atoi(token);
+			token = strtok(NULL,c);
+			G->nAristas = atoi(token);
+			token = strtok(NULL,c);
 		}
-		if (linea[0]=='e') {
+		else if(linea[0]=='e'){
 			token = strtok(linea,c);
 			token = strtok(NULL,c);
 			vertice1=atoi(token);
@@ -73,14 +47,9 @@ Grafo ConstruccionDelGrafo(){
 			token = strtok(NULL,c);
 			printf("%lu %lu\n",vertice1,vertice2 );
 		}
-		else{
-			break;
-		}
 	}
-
-
-
-
+	printf("%lu \n", G->nVertices);
+	printf("%lu \n", G->nAristas);
 	free(linea);
 	fclose(fp);
 	fp = NULL;
