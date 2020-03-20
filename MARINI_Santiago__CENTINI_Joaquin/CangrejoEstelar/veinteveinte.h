@@ -1,6 +1,6 @@
 #ifndef __vv_H
 #define __vv_H
-#define FILE_LINE_MAX_SIZE 100
+#define FILE_LINE_MAX_SIZE 97
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ u32 NumeroDeLados(Grafo G);
 u32 Delta(Grafo G);
 
 
-//funciones de infoextract de vertices 
+//funciones de infoextract de vertices
 //valor de retorno (2 a la 32)-1 para reportar errores.
 //salvo para las de "Nombre" que no tienen forma de reportar errores.
 //las otras no hay problema pues es imposible que (2 a la 32)-1 sea un color o un grado.

@@ -7,7 +7,7 @@
 
 struct GrafoSt {
     u32 nVertices;
-    u32 nLados;
+    u32 nAristas;
 	u32 delta;
     struct VerticeSt *vertices;
     u32 *orden; // es de tipo u32 por que solo necesitamos conocer el nombre del vertice

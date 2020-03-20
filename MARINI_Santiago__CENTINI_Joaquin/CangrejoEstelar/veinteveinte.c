@@ -10,80 +10,80 @@ Grafo ConstruccionDelGrafo(){
 	Grafo G;
 	G = (Grafo) malloc(sizeof(Grafo));
 	FILE *fp;
-	fp = fopen ("anna.txt", "rb");
-
+	fp = fopen ("anna.txt", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "No se pudo abrir el archivo\n");
 		return NULL;
 	}
-
 	if(G == NULL){
 		fprintf(stderr, "Fallo al reservar memoria\n");
 		return NULL;
 	}
-	u32 vertices, lados, vertice1, vertice2, anteriorvertice;
-	char linea[FILE_LINE_MAX_SIZE];
-	char *seteo;
-	char *letra;
-	do{
-		fgets(linea,FILE_LINE_MAX_SIZE,fp);
-	}while(linea[0]!='p');
+	const char c[2] = " ";
+	char *token;
+	u32 vertice1, vertice2;
+	char *linea=NULL;
+	int tam = 0;
+	printf("acatodobien\n");
+	if(getline(&linea,&tam,fp)==-1){
+		fprintf(stderr, "Error en elprimer getline\n");
+	}
+	printf("acatodobien\n");
+	while(linea[0]=='c'){
+		if(getline(&linea,&tam,fp)==-1){
+			fprintf(stderr, "Error en elprimer getline\n");
+		}
+	}
 	//en este punto en linea esta : p edge vertice lados
 	//si hago un fscanf u otro fgets empiezo a leer e v1 v2
-	int i=0;
-	int j=0;
-	while(i!=2){
-		if(linea[j]==' '){
-			i++;
-		}
-		j++;
-	}
-	i = 0;
-	while(linea[j]!=' '){
-		seteo[i] = linea[j];
-		i++;
-		j++;
-	}
-	G->nVertices = atoi(seteo);
+	token = strtok(linea,c);
+	token = strtok(NULL,c);
+	token = strtok(NULL,c);
+	G->nVertices=atoi(token);
+	token = strtok(NULL,c);
+	G->nAristas = atoi(token);
+	token = strtok(NULL,c);
 	printf("%lu \n", G->nVertices);
-	i = 0;
-	j++;
-	while(linea[j]!='\n'){
-		seteo[i] = linea[j];
-		i++;
-		j++;
-	}
-	seteo[i] ='\n';
-	G->nLados = atoi(seteo);
-	printf("%lu\n", G->nLados);
+	printf("%lu \n", G->nAristas);
+
+
 	//seteamos el orden, por defecto natural?, verificar si esta bien
-	G->orden = malloc(sizeof(u32)*G->nVertices);
-	G->vertices = calloc(G->nVertices,sizeof(Vertice));
+	G->orden = calloc(G->nVertices, sizeof(u32));
+	G->vertices = calloc(G->nVertices, sizeof(struct VerticeSt));
 
 	for(int i = 0;i < (int)G->nVertices; i++){
 		G->orden[i]=i+1;
-		//G->vertices[i].nombre = i+1;
+		G->vertices[i].nombre = i+1;
 	}
 	printf("El nombre del vertice n5 del orden del grafo es: %lu\n", G->orden[5]);
-	char basura;
-	for(u32 i = 0;i < G->nLados; i++){
-		fscanf(fp,"%c %lu %lu\n",&basura,&vertice1,&vertice2);
-		/* --PRIMER INTENTO DE SETER VECINOS Y CREAR VERTICES--(MEDIO RANCIO)
-		if(i==0){
-			//crearvertice();
-			//setear un vecino;
+
+	for(u32 i = 0; i <= G->nAristas; i++){
+		free(linea);
+		linea = NULL;
+		tam = 0;
+		if(getline(&linea,&tam,fp) == -1){
+			fprintf(stderr, "Error en el 2 getline\n");
+		}
+		if (linea[0]=='e') {
+			token = strtok(linea,c);
+			token = strtok(NULL,c);
+			vertice1=atoi(token);
+			token = strtok(NULL,c);
+			vertice2 = atoi(token);
+			token = strtok(NULL,c);
+			printf("%lu %lu\n",vertice1,vertice2 );
 		}
 		else{
-			if(G->vertices[i-1].nombre != vertice1){
-				//crearvertice();
-			}
-			else{
-				//setear un vecino;
-			}
-		}*/
+			break;
+		}
 	}
 
-	if(fclose(fp)==-1){perror("No se pudo cerrar el archivo");};
+
+
+
+	free(linea);
+	fclose(fp);
+	fp = NULL;
 	return G;
 }
 
@@ -99,7 +99,7 @@ u32 NumeroDeVertices(Grafo G){
 
 u32 NumeroDeLados(Grafo G){
 	assert(G != NULL);
-	return(G->nLados);
+	return(G->nAristas);
 }
 
 u32 Delta(Grafo G){
