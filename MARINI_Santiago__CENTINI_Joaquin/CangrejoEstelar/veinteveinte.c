@@ -25,7 +25,6 @@ Grafo ConstruccionDelGrafo(){
 	char linea[FILE_LINE_MAX_SIZE];
 	char *seteo;
 	char *letra;
-
 	do{
 		fgets(linea,FILE_LINE_MAX_SIZE,fp);
 	}while(linea[0]!='p');
@@ -46,7 +45,7 @@ Grafo ConstruccionDelGrafo(){
 		j++;
 	}
 	G->nVertices = atoi(seteo);
-	printf("%u \n", G->nVertices);
+	printf("%lu \n", G->nVertices);
 	i = 0;
 	j++;
 	while(linea[j]!='\n'){
@@ -56,10 +55,35 @@ Grafo ConstruccionDelGrafo(){
 	}
 	seteo[i] ='\n';
 	G->nLados = atoi(seteo);
-	printf("%u\n", G->nLados);
+	printf("%lu\n", G->nLados);
+	//seteamos el orden, por defecto natural?, verificar si esta bien
+	G->orden = malloc(sizeof(u32)*G->nVertices);
+	G->vertices = calloc(G->nVertices,sizeof(Vertice));
 
-	fclose(fp);
+	for(int i = 0;i < (int)G->nVertices; i++){
+		G->orden[i]=i+1;
+		//G->vertices[i].nombre = i+1;
+	}
+	printf("El nombre del vertice n5 del orden del grafo es: %lu\n", G->orden[5]);
+	char basura;
+	for(u32 i = 0;i < G->nLados; i++){
+		fscanf(fp,"%c %lu %lu\n",&basura,&vertice1,&vertice2);
+		/* --PRIMER INTENTO DE SETER VECINOS Y CREAR VERTICES--(MEDIO RANCIO)
+		if(i==0){
+			//crearvertice();
+			//setear un vecino;
+		}
+		else{
+			if(G->vertices[i-1].nombre != vertice1){
+				//crearvertice();
+			}
+			else{
+				//setear un vecino;
+			}
+		}*/
+	}
 
+	if(fclose(fp)==-1){perror("No se pudo cerrar el archivo");};
 	return G;
 }
 

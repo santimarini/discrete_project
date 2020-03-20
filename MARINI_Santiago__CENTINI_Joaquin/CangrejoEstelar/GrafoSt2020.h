@@ -1,6 +1,6 @@
 #ifndef GRAFOST2020_H
 #define GRAFOST2020_H
-#define u32 unsigned int
+#define u32 unsigned long int
 
 
 
