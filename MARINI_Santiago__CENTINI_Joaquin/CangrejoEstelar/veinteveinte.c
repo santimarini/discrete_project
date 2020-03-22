@@ -8,7 +8,7 @@
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
 Grafo ConstruccionDelGrafo(){
     Grafo G;
-    G = (Grafo) malloc(sizeof(Grafo));
+    G = (Grafo) calloc(1, sizeof(Grafo));
     FILE *fp =NULL;
     fp = fopen("anna.txt", "r");
 
@@ -28,20 +28,21 @@ Grafo ConstruccionDelGrafo(){
     u32 prev_vertice = 0, vertice = 0, vecino = 0;
     u32 pos = 0;
     while(!feof(fp)){
-        if(getline(&linea, &tam, fp) == -1) {//hay q ver esto pq retorna -1 cuando hay EOF o error
+        if(getline(&linea, &tam, fp) == -1) {
             break;
         }
-            prev_vertice = vertice; //guardo el valor de vertice para luego comparar
-            if(linea[0] == 'p'){
+        prev_vertice = vertice; //guardo el valor de vertice para luego comparar
+        if(linea[0] == 'p'){
             token = strtok(linea, c);
-            token = strtok(NULL,c);
-            token = strtok(NULL,c);
+            token = strtok(NULL, c);
+            token = strtok(NULL, c);
             G->nVertices = atoi(token);
-            token = strtok(NULL,c);
+            token = strtok(NULL, c);
             G->nLados = atoi(token);
-            token = strtok(NULL,c);
+            token = strtok(NULL, c);
         /*allocamos memoria para los vertices*/
             G->vertices = calloc(NumeroDeVertices(G), sizeof(struct VerticeSt));
+            
         }else if(linea[0] == 'e'){
             /*parseo vertice*/
             token = strtok(linea, c);
@@ -51,34 +52,34 @@ Grafo ConstruccionDelGrafo(){
             vecino = atoi(token);
             token = strtok(NULL, c);
        
-            /*ahora comparo para ver si son iguales y aumento el grado*/
-
-            //printf("grado de vertice %lu es %lu\n",vertice,grade);
-            if(prev_vertice != 0){ //quiere decir q solo leyó un vertice
+        /*ahora comparo para ver si son iguales y aumento el grado*/
+            if (prev_vertice!=0){
                 if(prev_vertice == vertice){
                     grade++;
+                    printf("vertice %lu colocado en pos: %lu con grado %lu\n",vertice, pos, grade);
+
                 }else{
-                    /*quiere decir q no se repite, por eso ya lo pongo en vertices*/
-                    /*hay q chequear las posiciones, está dejando lugares sin asignar*/
-                    G->vertices[pos].nombre = vertice - 1; //
-                    G->vertices[pos].grado = grade;
+                /*quiere decir q no se repite, por eso subo pos*/
                     pos++;
                     grade = 1;
-                	printf("count :%lu\n", pos);;
                 }
             }
-                    printf("grade %lu\n", grade);
+            G->vertices[pos].nombre = vertice; //
+            G->vertices[pos].grado = grade;
+
+            printf("grade %lu\n", grade);
         }
     }
     free(linea);
     /*vas a notar cuando corras q este for se ejecuta más allá de lo q deberia, se debe ejecutar hasta 136*/
     /*esto es lo q rompe el archivo*/
-    for (u32 i=0; i< NumeroDeVertices(G);i++)
-    	printf("orden vertice %lu : %lu\n",G->vertices[i].nombre, G->vertices[i].grado );
+    for (u32 i = 0; i< NumeroDeVertices(G);i++)
+        printf("grado vertice %lu : %lu\n",G->vertices[i].nombre, G->vertices[i].grado );
 
+    printf("nvertices: %lu\n", NumeroDeVertices(G) );
     if(fp != NULL){
-    	//fclose(fp);
-    	fp=NULL;
+        //fclose(fp);
+        fp=NULL;
     }
     return G;
 }
