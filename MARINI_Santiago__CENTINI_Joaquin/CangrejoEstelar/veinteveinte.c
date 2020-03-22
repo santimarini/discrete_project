@@ -9,7 +9,7 @@
 Grafo ConstruccionDelGrafo(){
     Grafo G;
     G = (Grafo) malloc(sizeof(Grafo));
-    FILE *fp;
+    FILE *fp =NULL;
     fp = fopen("anna.txt", "r");
 
     if (fp == NULL) {
@@ -26,8 +26,9 @@ Grafo ConstruccionDelGrafo(){
     u32 tam = 0;
     u32 grade = 1;
     u32 prev_vertice = 0, vertice = 0, vecino = 0;
-    while(feof(fp) == 0){
-        if(getline(&linea, &tam, fp) == -1) {   //hay q ver esto pq retorna -1 cuando hay EOF o error
+    u32 pos = 0;
+    while(!feof(fp)){
+        if(getline(&linea, &tam, fp) == -1) {//hay q ver esto pq retorna -1 cuando hay EOF o error
             break;
         }
             prev_vertice = vertice; //guardo el valor de vertice para luego comparar
@@ -51,26 +52,34 @@ Grafo ConstruccionDelGrafo(){
             token = strtok(NULL, c);
        
             /*ahora comparo para ver si son iguales y aumento el grado*/
-            printf("grado de vertice %lu es %lu\n",vertice,grade);
+
+            //printf("grado de vertice %lu es %lu\n",vertice,grade);
             if(prev_vertice != 0){ //quiere decir q solo leyó un vertice
                 if(prev_vertice == vertice){
                     grade++;
                 }else{
                     /*quiere decir q no se repite, por eso ya lo pongo en vertices*/
-                    printf("grado de vertice %lu es %lu\n", vertice, grade);
-                    G->vertices[vertice].nombre = vertice - 1;
-                    G->vertices[vertice].grado = grade;
+                    /*hay q chequear las posiciones, está dejando lugares sin asignar*/
+                    G->vertices[pos].nombre = vertice - 1; //
+                    G->vertices[pos].grado = grade;
+                    pos++;
                     grade = 1;
+                	printf("count :%lu\n", pos);;
                 }
             }
+                    printf("grade %lu\n", grade);
         }
-
     }
     free(linea);
-    printf("%lu \n", G->nVertices);
-    printf("%lu \n", G->nLados);
+    /*vas a notar cuando corras q este for se ejecuta más allá de lo q deberia, se debe ejecutar hasta 136*/
+    /*esto es lo q rompe el archivo*/
+    for (u32 i=0; i< NumeroDeVertices(G);i++)
+    	printf("orden vertice %lu : %lu\n",G->vertices[i].nombre, G->vertices[i].grado );
 
-    //fclose(fp);
+    if(fp != NULL){
+    	//fclose(fp);
+    	fp=NULL;
+    }
     return G;
 }
 
