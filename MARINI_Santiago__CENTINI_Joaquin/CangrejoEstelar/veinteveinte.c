@@ -4,20 +4,19 @@
 #include <string.h>
 #include "veinteveinte.h"
 
-int compare(const void *n1, const void *n2){
+static int compare(const void *n1, const void *n2){
   int x, y;
   x = *(int *) n1;
   y = *(int *) n2;
   if(x < y){
     return -1;
   }
-  else if(x==y){
+  else if(x == y){
     return 0;
   }
-  else{
     return 1;
-  }
 }
+
 static u32 existevertice(Grafo G, u32 count, u32 vert){
     for (u32 i = 0; i < count; i++) {
         if(G->vertices[i].nombre == vert){
@@ -26,6 +25,7 @@ static u32 existevertice(Grafo G, u32 count, u32 vert){
     }
     return 0;
 }
+
 static u32 get_idx(Grafo g, u32 count, u32 vert){
     u32 ret=0;
     while(ret < count){
@@ -39,11 +39,11 @@ static u32 get_idx(Grafo g, u32 count, u32 vert){
 
 
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
-Grafo ConstruccionDelGrafo(){
+Grafo ConstruccionDelGrafo(char const *filename){
     Grafo G;
     G = calloc(1, sizeof(struct GrafoSt));
     FILE *fp = NULL;
-    fp = fopen("anna.txt", "r");
+    fp = fopen(filename, "r");
 
     if (fp == NULL) {
         fprintf(stderr, "No se pudo abrir el archivo\n");
@@ -88,21 +88,21 @@ Grafo ConstruccionDelGrafo(){
         i++;
         if(!existevertice(G, pos_ver, vertice)){
             G->vertices[pos_ver].nombre = vertice;
-            G->vertices[pos_ver].grado = 1u;
+            G->vertices[pos_ver].grado = 1;
             G->vertices[pos_ver].color = 0;
             G->orden_creciente[pos_ver].nombre = vertice;
-            G->orden_creciente[pos_ver].grado = 1u;
+            G->orden_creciente[pos_ver].grado = 1;
             G->orden_creciente[pos_ver].color = 0;
             pos_ver++;
         }else{
-            G->vertices[get_idx(G,pos_ver, vertice)].grado += 1;
-            G->orden_creciente[get_idx(G,pos_ver, vertice)].grado += 1;
+            G->vertices[get_idx(G, pos_ver, vertice)].grado += 1;
+            G->orden_creciente[get_idx(G, pos_ver, vertice)].grado += 1;
         }
         if(!existevertice(G, pos_ver, vecino)){
             G->vertices[pos_ver].nombre = vecino;
-            G->vertices[pos_ver].grado = 1u;
+            G->vertices[pos_ver].grado = 1;
             G->orden_creciente[pos_ver].nombre = vecino;
-            G->orden_creciente[pos_ver].grado = 1u;
+            G->orden_creciente[pos_ver].grado = 1;
             G->orden_creciente[pos_ver].color = 0;
             pos_ver++;
         }else{
@@ -111,16 +111,6 @@ Grafo ConstruccionDelGrafo(){
         }
 
     }
-      for(u32 i = 0; i < G->nLados; i++) {
-        printf("(%lu %lu)\n", tuplas[i].extremo1, tuplas[i].extremo2);
-    }
-    printf("El orden de los vertices es: ");
-    for(u32 i = 0; i < num_vertices; i++){
-        printf("%lu ", G->vertices[i].nombre);
-    }
-    for(u32 i = 0; i < num_vertices; i++){
-        printf("\n El grado del vertice: %lu es: %lu \n",G->vertices[i].nombre, G->vertices[i].grado );
-    }
     u32 delta = 0;
     for(u32 i = 0; i < num_vertices; i++){
         if(delta < Grado(i, G)){
@@ -128,7 +118,7 @@ Grafo ConstruccionDelGrafo(){
         }
     }
     G->delta = delta;
-    printf("El delta del Grafo G es : %lu\n", G->delta);
+    printf("El delta del Grafo %s es : %lu\n", filename, G->delta);
     printf("\n");
     for(u32 i = 0; i < num_vertices; i++){
         u32 k = 0;
@@ -147,18 +137,13 @@ Grafo ConstruccionDelGrafo(){
             }
         }
     }
-    qsort(G->orden_creciente,NumeroDeVertices(G),sizeof(struct VerticeSt),&compare);
-    printf("El porden ascendente de los vertices es: ");
-    for(u32 i = 0; i < NumeroDeVertices(G); i++){
-      printf("%lu \n", G->orden_creciente[i].nombre);
-    }
-
-    printf("El nombre del primer vecino del vertice que esta en la posicion 0 es: %lu\n", G->vertices[0].vecinos[0].nombre);
+    qsort(G->orden_creciente, NumeroDeVertices(G), sizeof(struct VerticeSt), &compare);
 
     free(tuplas);
     free(linea);
     fclose(fp);
     fp = NULL;
+
     return G;
 }
 
@@ -230,7 +215,7 @@ u32 Nombre(u32 i, Grafo G){
 u32 Color(u32 i, Grafo G){
     assert(G != NULL);
     if(i >= G->nVertices)
-        return -1;
+        return -1u;
 
     return(G->vertices[i].color);
 }

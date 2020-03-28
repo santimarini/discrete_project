@@ -16,7 +16,7 @@ typedef struct VerticeSt *Vertice;
 typedef struct LadoSt *Lado;
 //construcci'on/destrucci'on
 
-Grafo ConstruccionDelGrafo();
+Grafo ConstruccionDelGrafo(char const *filename);
 
 void DestruccionDelGrafo(Grafo G);
 
