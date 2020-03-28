@@ -275,7 +275,13 @@ char FijarColor(u32 x,u32 i,Grafo G){
 char FijarOrden(u32 i, Grafo G, u32 N){
     assert(G != NULL);
     if(i < NumeroDeVertices(G) && N < NumeroDeVertices(G)){
-        G->vertices[i] = G->orden_creciente[N];
+        G->vertices[i].nombre = G->orden_creciente[N].nombre;
+        G->vertices[i].grado = G->orden_creciente[N].grado;
+        G->vertices[i].color = G->orden_creciente[N].color;
+        G->vertices[i].vecinos = realloc(G->vertices[i].vecinos, G->orden_creciente[N].grado * sizeof(struct VerticeSt));
+        for(u32 j = 0; j < G->vertices[i].grado; j++){
+          G->vertices[i].vecinos[j] = G->orden_creciente[N].vecinos[j];
+        }
         return 0;
     }
     return 1;
