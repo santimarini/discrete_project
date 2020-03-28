@@ -7,7 +7,7 @@ struct GrafoSt {
     u32 nLados;
 	  u32 delta;
     struct VerticeSt *vertices;
-    u32 *orden_creciente;
+    struct VerticeSt *orden_creciente;
 };
 
 struct VerticeSt {
