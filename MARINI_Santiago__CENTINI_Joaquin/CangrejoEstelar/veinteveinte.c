@@ -4,7 +4,20 @@
 #include <string.h>
 #include "veinteveinte.h"
 
-
+int compare(const void *n1, const void *n2){
+  int x, y;
+  x = *(int *) n1;
+  y = *(int *) n2;
+  if(x < y){
+    return -1;
+  }
+  else if(x==y){
+    return 0;
+  }
+  else{
+    return 1;
+  }
+}
 static u32 existevertice(Grafo G, u32 count, u32 vert){
     for (u32 i = 0; i < count; i++) {
         if(G->vertices[i].nombre == vert){
@@ -23,10 +36,8 @@ static u32 get_idx(Grafo g, u32 count, u32 vert){
     }
     return 0;
 }
-/*static u32 ordenarvert(u32 *orden_creciente, u32 pos_ord, u32 vertice, u32 vecino){
-    return pos_ord;
-}
-*/
+
+
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
 Grafo ConstruccionDelGrafo(){
     Grafo G;
@@ -67,7 +78,7 @@ Grafo ConstruccionDelGrafo(){
     G->vertices = calloc(num_vertices, sizeof(struct VerticeSt));
     G->orden_creciente = calloc(num_vertices, sizeof(u32));
     tuplas = calloc(num_lados, sizeof(struct LadoSt));
-    u32 pos_ver = 0, pos_ord = 0, i = 0;
+    u32 pos_ver = 0, i = 0;
     while(!feof(fp)){
         if(fscanf(fp,"%s %lu %lu", linea, &vertice, &vecino) == -1){
             break;
@@ -78,6 +89,7 @@ Grafo ConstruccionDelGrafo(){
         if(!existevertice(G, pos_ver, vertice)){
             G->vertices[pos_ver].nombre = vertice;
             G->vertices[pos_ver].grado = 1u;
+            G->orden_creciente[pos_ver] = vertice;
             pos_ver++;
         }else{
             G->vertices[get_idx(G,pos_ver, vertice)].grado += 1;
@@ -85,14 +97,15 @@ Grafo ConstruccionDelGrafo(){
         if(!existevertice(G, pos_ver, vecino)){
             G->vertices[pos_ver].nombre = vecino;
             G->vertices[pos_ver].grado = 1u;
+            G->orden_creciente[pos_ver] = vecino;
             pos_ver++;
         }else{
             G->vertices[get_idx(G, pos_ver, vecino)].grado += 1;
         }
-		//ordenarvert(G->orden_creciente, &pos_ord/*que peton*/, vertice, vecino);
 
     }
-    for(u32 i = 0; i < G->nLados; i++) {
+    qsort(G->orden_creciente,NumeroDeVertices(G),sizeof(u32),&compare);
+      for(u32 i = 0; i < G->nLados; i++) {
         printf("(%lu %lu)\n", tuplas[i].extremo1, tuplas[i].extremo2);
     }
     printf("El orden de los vertices es: ");
@@ -125,6 +138,12 @@ Grafo ConstruccionDelGrafo(){
             }
         }
     }
+    printf("El porden ascendente de los vertices es: ");
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      printf("%lu \n", G->orden_creciente[i]);
+    }
+
+    printf("El nombre del primer vecino del vertice que esta en la posicion 0 es: %lu", G->vertices[0].vecinos[0].nombre);
 
     free(tuplas);
     free(linea);
@@ -142,6 +161,31 @@ void DestruccionDelGrafo(Grafo G){
 	free(G);
 }
 
+Grafo CopiarGrafo(Grafo G){
+	assert(G != NULL);
+	Grafo G2;
+	G2 = calloc(1, sizeof(struct GrafoSt));
+	if(G2 == NULL){
+			fprintf(stderr, "Fallo al reservar memoria\n");
+			return NULL;
+	}
+	G2->nVertices = G ->nVertices;
+	G2->nLados = G->nLados;
+	G2->delta = G->delta;
+	G2->vertices = calloc(G->nVertices, sizeof(struct VerticeSt));
+	G2->orden_creciente = calloc(NumeroDeVertices(G2), sizeof(u32));
+	for(u32 i = 0; i < NumeroDeVertices(G); i++){
+		G2->vertices[i].nombre = G->vertices[i].nombre;
+		G2->vertices[i].grado = G->vertices[i].grado;
+		G2->vertices[i].color = G->vertices[i].color;
+		G2->vertices[i].vecinos = calloc(Grado(i,G2), sizeof(struct VerticeSt));
+		for (u32 j = 0; j < Grado(i,G); j++) {
+			G2->vertices[i].vecinos[j] = G->vertices[i].vecinos[j];
+		}
+    G2->orden_creciente[i] = G->orden_creciente[i];
+	}
+	return G2;
+}
 // -- FUNCIONES PARA EXTRAER INFORMACION DEL GRAFO --
 
 u32 NumeroDeVertices(Grafo G){
@@ -181,6 +225,28 @@ u32 Grado(u32 i, Grafo G){
 
     return(G->vertices[i].grado);
 }
+
+/* --FUNCIONES PARA EXTRAER INFORMACION DE LOS VECINOS DE UN VERTICE-- */
+
+u32 ColorVecino(u32 j, u32 i, Grafo G){
+  assert(G != NULL);
+  if(i >= NumeroDeVertices(G) || j >= Grado(i,G)){
+    return -1u;
+  }
+  return G->vertices[i].vecinos[j].color;
+}
+
+u32 NombreVecino(u32 j,u32 i,Grafo G){
+  assert(G != NULL);
+  return G->vertices[i].vecinos[j].nombre;
+}
+
+u32 OrdenVecino(u32 j,u32 i,Grafo G){
+  assert(G != NULL);
+  return get_idx(G,NumeroDeVertices(G),G->vertices[i].vecinos[j].nombre);
+}
+
+/*  --FUNCIONES PARA MODIFICAR DATOS DE LOS VERTICES-- */
 
 char FijarColor(u32 x,u32 i,Grafo G){
     if(i < NumeroDeVertices(G)){

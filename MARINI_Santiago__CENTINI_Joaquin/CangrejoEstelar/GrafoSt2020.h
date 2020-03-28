@@ -2,9 +2,6 @@
 #define GRAFOST2020_H
 #define u32 unsigned long int
 
-
-
-
 struct GrafoSt {
     u32 nVertices;
     u32 nLados;
