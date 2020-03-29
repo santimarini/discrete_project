@@ -14,7 +14,7 @@ static int compare(const void *n1, const void *n2){
     return -1;
   else if(x == y)
     return 0;
-  
+
   return 1;
 }
 
@@ -34,6 +34,86 @@ static u32 get_idx(Grafo g, u32 count, u32 vert){
     ret++;
   }
   return 0;
+}
+
+void merge(Vertice array, int p, int q, int r, u32 cual){
+  int i, j, k;
+  int n_1 = (q - p) + 1;
+  int n_2 = (r - q);
+  Vertice L, R;
+    // Asignacion de memoria
+  L = (Vertice)malloc(n_1 * sizeof(struct VerticeSt));
+  R = (Vertice)malloc(n_2 * sizeof(struct VerticeSt));
+
+    // Copia de datos del arreglo A en los subarreglos L y R
+    for (i = 0; i < n_1; i++){
+      L[i] = array[p + i];
+    }
+
+    for (j = 0; j < n_2; j++){
+      R[j] = array[q+j+1];
+    }
+
+    i = 0;
+    j = 0;
+
+    // Fusion de datos respetando el valor minimos entre dos arreglos
+    for (k = p; k < r + 1; k++){
+      if (i == n_1){
+        array[k] = R[j];
+        j =  j + 1;
+      }
+      else if(j == n_2){
+        array[k] = L[i];
+        i = i + 1;
+      }
+      else{
+        if(cual == 1){
+          if (L[i].grado >= R[j].grado){
+            array[k] = L[i];
+            i = i + 1;
+          }
+          else{
+            array[k] = R[j];
+            j = j + 1;
+          }
+        }
+        else if(cual == 2){
+          if (L[i].color >= R[j].color){
+            array[k] = L[i];
+            i = i + 1;
+          }
+          else{
+            array[k] = R[j];
+            j = j + 1;
+          }
+        }
+        else if(cual == 3){
+          if (L[i].color <= R[j].color){
+            array[k] = L[i];
+            i = i + 1;
+          }
+          else{
+            array[k] = R[j];
+            j = j + 1;
+          }
+        }
+      }
+    }
+}
+
+void merge_sort(Vertice array, int p, int r, u32 cual){
+  if (p < r){
+        // Dividir el problema en subproblemas
+    int q = (p + r)/2;
+
+        // Resolver el problema de manera recursiva hasta llegar a una solucion trivial
+    merge_sort(array, p, q, cual);
+    merge_sort(array, q + 1, r, cual);
+
+        // Fusion de resultados parciales
+    merge(array, p, q, r, cual);
+  }
 }
 
 
@@ -109,7 +189,7 @@ Grafo ConstruccionDelGrafo(char const *filename){
       G->orden_creciente[get_idx(G, pos_ver, vecino)].grado += 1;
     }
   }
-  
+
   u32 delta = 0;
   for(u32 i = 0; i < num_vertices; i++){
     if(delta < Grado(i, G)){
@@ -270,4 +350,25 @@ char FijarOrden(u32 i, Grafo G, u32 N){
     return 0;
   }
   return 1;
+}
+
+// --FUNCIONES DE ORDENACION--
+
+char WelshPowell(Grafo G){
+  u32 cual = 1;
+  merge_sort(G->vertices, 0, NumeroDeVertices(G)-1, cual);
+
+  return 0;
+}
+
+char RevierteBC(Grafo G){
+  u32 cual = 2;
+  merge_sort(G->vertices, 0, NumeroDeVertices(G)-1, cual);
+  return 0;
+}
+
+char ChicoGrandeBC(Grafo G){
+  u32 cual = 3;
+  merge_sort(G->vertices, 0, NumeroDeVertices(G)-1,cual);
+  return 0;
 }

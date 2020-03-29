@@ -14,7 +14,12 @@ int main(int argc, char const *argv[])
     char const *filename = argv[1];
     Grafo G;
     G = ConstruccionDelGrafo(filename);
-    
+    printf("Ahora viene WelshPowell\n");
+    WelshPowell(G);
+    printf("paso WelshPowell el nuevo orden es: \n");
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      printf("nombre: %lu, grado: %lu \n", G->vertices[i].nombre, G->vertices[i].grado);
+    }
     if (G != NULL)
         DestruccionDelGrafo(G);
 
