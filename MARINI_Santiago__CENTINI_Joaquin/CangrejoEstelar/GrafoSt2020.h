@@ -5,21 +5,26 @@
 struct GrafoSt {
     u32 nVertices;
     u32 nLados;
-	  u32 delta;
-    struct VerticeSt *vertices;
-    struct VerticeSt *orden_creciente;
+    u32 delta;
+    struct __node *node;
+    u32 *orden_interno;
+    u32 *orden_natural;
+};
+
+struct __node 
+{ 
+  u32 key;
+  struct VerticeSt *vert;
+  struct __node *left; 
+  struct __node *right; 
+  int height; 
 };
 
 struct VerticeSt {
     u32 nombre;
     u32 grado;
     u32 color;
-    struct VerticeSt *vecinos;
-};
-
-struct LadoSt{
-	u32 extremo1;
-	u32 extremo2;
+    struct VerticeSt **vecinos;
 };
 
 #endif
