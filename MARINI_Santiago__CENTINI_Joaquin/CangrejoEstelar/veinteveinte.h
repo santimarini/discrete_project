@@ -5,15 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
 #include "GrafoSt2020.h"
 
 //Grafo es un puntero a una estructura, la cual esta definida en el .h de arriba
 
 typedef struct GrafoSt *Grafo;
 typedef struct VerticeSt *Vertice;
-typedef struct LadoSt *Lado;
+typedef struct __node *Node;
+
 //construcci'on/destrucci'on
 
 Grafo ConstruccionDelGrafo(char const *filename);
