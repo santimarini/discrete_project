@@ -11,5 +11,9 @@ program: $(OBJS)
 %.o: %.c 
 		$(CC) $(CFLAGS) -c $< -o $@
 
+mem_check: 
+		valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ./$(BINARY) miles1500.corr
+
+
 clean:
 		@rm -rf $(BINARY) $(OBJS)
