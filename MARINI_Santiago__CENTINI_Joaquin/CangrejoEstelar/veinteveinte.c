@@ -159,6 +159,7 @@ Grafo ConstruccionDelGrafo(char const *filename){
     if(!is_in_Node(vertice, tree)){
       verts[i]->nombre = vertice;
       verts[i]->grado = 1;
+      verts[i]->color = -1u;
       G->orden_natural[i] = G->orden_interno[i] = vertice;
       tree = insert(tree, verts[i]);
       i++;
@@ -172,6 +173,7 @@ Grafo ConstruccionDelGrafo(char const *filename){
     if(!is_in_Node(vecino, tree)){
       verts[i]->nombre = vecino;
       verts[i]->grado = 1;
+      verts[i]->color = -1u;
       G->orden_natural[i] = G->orden_interno[i] = vecino;
       ver = get_Vertice(vertice, tree);
       ver->vecinos[ver->grado - 1u] = verts[i];
@@ -190,9 +192,9 @@ Grafo ConstruccionDelGrafo(char const *filename){
     }
   }
   G->node = tree;
-
   qsort(G->orden_natural, num_vertices, sizeof(u32), &compare);
-    /*free extra memory*/
+    /*calcule of delta*/
+
   u32 max_grado = 0;
   Vertice v = NULL;
   for (u32 i = 0; i < num_vertices; i++){
@@ -203,6 +205,11 @@ Grafo ConstruccionDelGrafo(char const *filename){
     }
   }
 
+ /* Vertice ve = get_Vertice(18, tree);
+  for (u32 i = 0; i < ve->grado; i++)
+    printf("%lu ", ve->vecinos[i]->nombre);
+    */
+  free(verts);
   free(linea);
 
   fclose(fp);
@@ -213,6 +220,8 @@ Grafo ConstruccionDelGrafo(char const *filename){
 
 void DestruccionDelGrafo(Grafo G){
   if(G != NULL){
+    for (u32 i = 0; i < NumeroDeVertices(G); i++)
+      free(get_Vertice(G->orden_interno[i], G->node));
     tree_Destroy(G->node);
     G->node = NULL;
     free(G->orden_natural);
@@ -297,8 +306,8 @@ u32 Grado(u32 i, Grafo G){
   assert(G != NULL);
   if (i >= G->nVertices)
     return -1u;
+  
   Vertice v = get_Vertice(G->orden_interno[i], G->node);
-
   if (v != NULL)
     return(v->grado);
   
@@ -309,17 +318,25 @@ u32 Grado(u32 i, Grafo G){
 
 u32 ColorVecino(u32 j, u32 i, Grafo G){
   assert(G != NULL);
-  if(i >= NumeroDeVertices(G) || j >= Grado(i,G))
+  if (i >= NumeroDeVertices(G) || j >= Grado(i,G))
     return -1u;
-  Vertice v = get_Vertice(G->orden_interno[i], G->node);
 
-  return v->vecinos[j]->color;
+  Vertice v = get_Vertice(G->orden_interno[i], G->node);
+  if (v != NULL){
+  	if (v->vecinos[0] != NULL)
+    return v->vecinos[j]->color;
+  }
+  return -1u;
 }
 
 u32 NombreVecino(u32 j, u32 i, Grafo G){
   assert(G != NULL);
+
   Vertice v = get_Vertice(G->orden_interno[i], G->node);
-  return v->vecinos[j]->nombre;
+  if (v != NULL)
+    return v->vecinos[j]->nombre;
+
+  return -1u;
 }
 
 /*
@@ -336,8 +353,10 @@ u32 OrdenVecino(u32 j, u32 i, Grafo G){
 char FijarColor(u32 x, u32 i, Grafo G){
   if(i < NumeroDeVertices(G)){
     Vertice v = get_Vertice(G->orden_interno[i], G->node);
-    v->color = x;
-    return 0;
+    if(v != NULL){
+      v->color = x;
+      return 0;
+    }
   }
   return 1;
 }
@@ -385,24 +404,51 @@ char ChicoGrandeBC(Grafo G){
   return 0;
 }
 
-/*
 u32 Greedy(Grafo G){
-  u32 cantidad_de_colores = 1;
+  assert(G != NULL);
+  u32 cantidad_colores = 1;
   u32 *color = calloc(cantidad_colores, sizeof(u32));
-  if()
-  for (u32 i = 0; i < NumeroDeVertices(G); i++){
-    for (u32 j = 0; i < Grado(i, G); j++){
-      printf("%lu\n", Grado(i,G));
-      if(ColorVecino(i, j, G) == G->vertices[i].color){
-        color += 1;
-        FijarColor(color, i, G);
-      }else{
-        FijarColor(color, i, G);
+  u32 *used = calloc(cantidad_colores, sizeof(u32));
+  if(color == NULL || used == NULL)
+    return -1u;
+  color[0] = cantidad_colores - 1u; 
+  
+  for (u32 i = 0; i < NumeroDeVertices(G); i++) {
+    for (u32 j = 0; j < Grado(i, G); j++) {
+      /* en el caso de no estar pintado le pongo 0, luego veo si hace falta cambiar */
+      if (Color(i, G) == -1u) { 
+        FijarColor(color[0], i, G);
+        used[color[0]] = 1;
+      }
+	  u32 free_color = -1u;
+      /* check si hay color libre, si lo hay devuelve en free_color el primero */
+      for (u32 count = 0; count < cantidad_colores; count++) { 
+        if (used[count] == 0) {
+          free_color = count;
+          break;
+        }
+      }
+      /*ahora comparo vertice con vecino para ver si con los colores que tengo me alcanza o no*/
+
+      while(ColorVecino(j, i, G) == Color(i, G)) {
+        if (free_color != -1u) { //si tengo un color libre pinto con ese color
+          FijarColor(color[free_color], i, G);
+          used[free_color] = 1;
+          continue;
+          /* no tengo colores libres, genero uno nuevo */
+        }else{ 
+          cantidad_colores += 1;
+          color = realloc(color, sizeof(u32) * cantidad_colores);
+          color[cantidad_colores-1] = cantidad_colores-1u;
+          FijarColor(color[cantidad_colores-1u], i, G);
+          used[color[cantidad_colores-1u]] = 1;
+        }
       }
     }
+    for(u32 count = 0; count < cantidad_colores; count++)
+    	used[count] = 0;
+    used[Color(i,G)] = 1;
   }
 
-  return color;
+  return cantidad_colores;
 }
-
-*/
