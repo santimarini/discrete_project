@@ -4,7 +4,15 @@
 #include <string.h>
 #include "veinteveinte.h"
 #include "avl_tree.h"
+#include <time.h>
 
+struct ParaOrdenarA{
+    u32 name;
+    u32 informacion;
+    u32 indice;
+};
+
+typedef struct ParaOrdenarA *ParaOrdenar;
 
 // -- auxiliar functions -- //
 static int compare(const void *n1, const void *n2){
@@ -19,93 +27,42 @@ static int compare(const void *n1, const void *n2){
   return 1;
 }
 
-void merge(u32 *array, Node tree, int p, int q, int r, u32 cual){
-  int i, j, k;
-  int n_1 = (q - p) + 1;
-  int n_2 = (r - q);
-  u32 *L;
-  u32 *R;
-  Vertice vl = NULL, vr = NULL;
-    // Asignacion de memoria
-  L = (u32 *) malloc(n_1 * sizeof(u32));
-  R = (u32 *) malloc(n_2 * sizeof(u32));
+static int compare1(const void *n1, const void *n2){
+  ParaOrdenar x, y;
+  x = (ParaOrdenar)n1;
+  y = (ParaOrdenar)n2;
+  if(x->name < y->name)
+    return -1;
+  else if(x->name == y->name)
+    return 0;
 
-  // Copia de datos del arreglo A en los subarreglos L y R
-  for (i = 0; i < n_1; i++){
-    L[i] = array[p + i];
-  }
-
-  for (j = 0; j < n_2; j++){
-    R[j] = array[q+j+1];
-  }
-
-  i = 0;
-  j = 0;
-
-  // Fusion de datos respetando el valor minimos entre dos arreglos
-  for (k = p; k < r + 1; k++){
-    if (i == n_1){
-      array[k] = R[j];
-      j =  j + 1;
-    }
-    else if(j == n_2){
-      array[k] = L[i];
-      i = i + 1;
-    }
-    else{
-      if(cual == 1){
-        vl = get_Vertice(L[i], tree);
-        vr = get_Vertice(R[j], tree);
-        if (vl->grado >= vr->grado){
-          array[k] = L[i];
-          i = i + 1;
-        }
-        else{
-          array[k] = R[j];
-          j = j + 1;
-        }
-      }
-      else if(cual == 2){
-        vl = get_Vertice(L[i], tree);
-        vr = get_Vertice(R[j], tree);
-        if (vl->color >= vr->color){
-          array[k] = L[i];
-          i = i + 1;
-        }
-        else{
-          array[k] = R[j];
-          j = j + 1;
-        }
-      }
-      else if(cual == 3){
-        vl = get_Vertice(L[i], tree);
-        vr = get_Vertice(R[j], tree);
-        if (vl->color <= vr->color){
-          array[k] = L[i];
-          i = i + 1;
-        }
-        else{
-          array[k] = R[j];
-          j = j + 1;
-        }
-      }
-    }
-  }
+  return 1;
 }
 
-void merge_sort(u32 *array, Node tree, int p, int r, u32 cual){
-  if (p < r){
-        // Dividir el problema en subproblemas
-    int q = (p + r)/2;
+static int compare2(const void *n1, const void *n2){
+  ParaOrdenar x, y;
+  x = (ParaOrdenar) n1;
+  y = (ParaOrdenar) n2;
+  if(x->informacion > y->informacion)
+    return -1;
+  else if(x->informacion == y->informacion)
+    return 0;
 
-        // Resolver el problema de manera recursiva hasta llegar a una solucion trivial
-    merge_sort(array, tree, p, q, cual);
-    merge_sort(array, tree, q + 1, r, cual);
-
-        // Fusion de resultados parciales
-    merge(array, tree, p, q, r, cual);
-  }
+  return 1;
 }
+
+static int compare3(const void *n1, const void *n2){
+  ParaOrdenar x, y;
+  x = (ParaOrdenar) n1;
+  y = (ParaOrdenar) n2;
+  if(x->informacion < y->informacion)
+    return -1;
+  else if(x->informacion == y->informacion)
+    return 0;
+
+  return 1;
+}
+
 
 // -- FUNCIONES DE CONSTRUCCION/DESTRUCCION/COPIA DEL GRAFO --
 Grafo ConstruccionDelGrafo(char const *filename){
@@ -195,13 +152,11 @@ Grafo ConstruccionDelGrafo(char const *filename){
   qsort(G->orden_natural, num_vertices, sizeof(u32), &compare);
     /*calcule of delta*/
 
-  u32 max_grado = 0;
   Vertice v = NULL;
   for (u32 i = 0; i < num_vertices; i++){
     v = get_Vertice(G->orden_interno[i], G->node);
-    if (v->grado > max_grado){
-      max_grado = v->grado;
-      G->delta = max_grado;
+    if (v->grado > G->delta){
+      G->delta = v->grado;
     }
   }
 
@@ -220,9 +175,13 @@ Grafo ConstruccionDelGrafo(char const *filename){
 
 void DestruccionDelGrafo(Grafo G){
   if(G != NULL){
-    for (u32 i = 0; i < NumeroDeVertices(G); i++)
+    for (u32 i = 0; i < NumeroDeVertices(G); i++){
+      free(get_Vertice(G->orden_interno[i], G->node)->vecinos);
       free(get_Vertice(G->orden_interno[i], G->node));
+    }
     tree_Destroy(G->node);
+
+
     G->node = NULL;
     free(G->orden_natural);
     free(G->orden_interno);
@@ -364,91 +323,178 @@ char FijarColor(u32 x, u32 i, Grafo G){
 char FijarOrden(u32 i, Grafo G, u32 N){
   assert(G != NULL);
   if(i < NumeroDeVertices(G) && N < NumeroDeVertices(G)){
-    Vertice v_int = get_Vertice(G->orden_interno[i], G->node);
-    Vertice v_nat = get_Vertice(G->orden_natural[N], G->node);
-    v_int->nombre = v_nat->nombre;
-    v_int->grado = v_nat->grado;
-    v_int->color = v_nat->color;
-    v_int->vecinos = realloc(v_int->vecinos, v_nat->grado * sizeof(struct VerticeSt));
-    for(u32 j = 0; j < v_int->grado; j++){
-      v_int->vecinos[j] = v_nat->vecinos[j];
-    }
+    G->orden_interno[i] = G->orden_natural[N];
     return 0;
   }
   return 1;
 }
 
 // --FUNCIONES DE ORDENACION--
-
 char WelshPowell(Grafo G){
-  assert(G != NULL);
-  u32 cual = 1;
-  merge_sort(G->orden_interno, G->node, 0, NumeroDeVertices(G)-1, cual);
-
-  return 0;
-}
-
-char RevierteBC(Grafo G){
-  assert(G != NULL);
-  u32 cual = 2;
-  merge_sort(G->orden_interno, G->node, 0, NumeroDeVertices(G)-1, cual);
-
-  return 0;
+    ParaOrdenar A;
+    A = calloc(NumeroDeVertices(G),sizeof(struct ParaOrdenarA));
+    if(!A){
+      return 1;
+    }
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        A[i].name = Nombre(i,G);
+        A[i].informacion = Grado(i,G);
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare1);
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      A[i].indice = i;
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare2);
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      FijarOrden(i,G,A[i].indice);
+    }
+    return 0;
 }
 
 char ChicoGrandeBC(Grafo G){
-  assert(G != NULL);
-  u32 cual = 3;
-  merge_sort(G->orden_interno, G->node, 0, NumeroDeVertices(G)-1, cual);
+    ParaOrdenar A;
+    u32 cantidad_colores;
+    u32 *cantidad_vertices_color;
+    A = calloc(NumeroDeVertices(G),sizeof(struct ParaOrdenarA));
+    if(!A){
+      return 1;
+    }
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        A[i].name = Nombre(i,G);
+        A[i].informacion = Color(i,G);
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare1);
+    for(u32 i = 0; i < NumeroDeVertices(G); i ++){
+        A[i].indice = i;
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare2);
+    cantidad_colores = A[0].informacion + 1;
+    cantidad_vertices_color = calloc(cantidad_colores,sizeof(u32));
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        cantidad_vertices_color[Color(i,G)] += 1;
+    }
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        A[i].cardinal = cantidad_vertices_color[A[i].informacion];
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare3);
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      FijarOrden(i,G,A[i].indice);
+    }
+    return 0;
+}
+
+char RevierteBC(Grafo G){
+    ParaOrdenar A;
+    u32 cantidad_colores;
+    u32 *cantidad_vertices_color;
+    A = calloc(NumeroDeVertices(G),sizeof(struct ParaOrdenarA));
+    if(!A){
+      return 1;
+    }
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        A[i].name = Nombre(i,G);
+        A[i].informacion = Color(i,G);
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare1);
+    for(u32 i = 0; i < NumeroDeVertices(G); i ++){
+        A[i].indice = i;
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare2);
+    cantidad_colores = A[0].informacion + 1;
+    cantidad_vertices_color = calloc(cantidad_colores,sizeof(u32));
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        cantidad_vertices_color[Color(i,G)] += 1;
+    }
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+        A[i].cardinal = cantidad_vertices_color[A[i].informacion];
+    }
+    qsort(A,NumeroDeVertices(G),sizeof(struct ParaOrdenarA),&compare4);
+    for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      FijarOrden(i,G,A[i].indice);
+    }
+    return 0;
+}
+
+char AleatorizarVertices(Grafo G, u32 R){
+	ParaOrdenar A;
+  A = calloc(NumeroDeVertices(G), sizeof(struct ParaOrdenarA));
+  if(!A)
+    return 1;
+
+  for(u32 i = 0; i < NumeroDeVertices(G); i++){
+      A[i].name = Nombre(i,G);
+      A[i].informacion = Color(i, G);
+	}
+	/*acá ordeno para obtener los indices del orden natural*/
+	qsort(A, NumeroDeVertices(G), sizeof(struct ParaOrdenarA), &compare1);
+  
+  for(u32 i = 0; i < NumeroDeVertices(G); i++)
+    A[i].indice = i;
+
+	for (u32 i = 0; i < NumeroDeVertices(G); i++){
+		srand(R);
+		u32 random = (u32) (rand() %  NumeroDeVertices(G));
+		if (random != i){
+			u32 tmp = A[random].indice;
+			A[random].indice = A[i].indice;
+			A[i].indice = tmp;
+		}
+	}
+
+	for (u32 i = 0; i < NumeroDeVertices(G); i++)
+		FijarOrden(i, G , A[i].indice);
+
+	free(A);
   
   return 0;
+}
+
+static u32 IsIn(u32 e, u32 *array, u32 N){
+	for (u32 i = 0; i < N; i++){
+		if(array[i] == e)
+			return 1;
+	}
+	return 0;
+}
+
+static u32 BuscarMinNoUsado(u32 *array, u32 N, u32 cantidad_colores){
+
+	for (u32 i = 0; i < N; i++){
+		if (!IsIn(i, array, N)){
+				return i;
+		}
+	}
+	return cantidad_colores - 1u;
 }
 
 u32 Greedy(Grafo G){
   assert(G != NULL);
+  u32 color_minimo = 0;
   u32 cantidad_colores = 1;
-  u32 *color = calloc(cantidad_colores, sizeof(u32));
-  u32 *used = calloc(cantidad_colores, sizeof(u32));
-  if(color == NULL || used == NULL)
-    return -1u;
-  color[0] = cantidad_colores - 1u; 
-  
+  u32 *colores = (u32 *) calloc(NumeroDeVertices(G), sizeof(u32));
+  u32 *colores_vecinos = NULL;
+  for (u32 i = 0; i < NumeroDeVertices(G); i++)
+  	FijarColor(-1u, i, G);
+
   for (u32 i = 0; i < NumeroDeVertices(G); i++) {
-    for (u32 j = 0; j < Grado(i, G); j++) {
-      /* en el caso de no estar pintado le pongo 0, luego veo si hace falta cambiar */
-      if (Color(i, G) == -1u) { 
-        FijarColor(color[0], i, G);
-        used[color[0]] = 1;
-      }
-	  u32 free_color = -1u;
-      /* check si hay color libre, si lo hay devuelve en free_color el primero */
-      for (u32 count = 0; count < cantidad_colores; count++) { 
-        if (used[count] == 0) {
-          free_color = count;
-          break;
-        }
-      }
-      /*ahora comparo vertice con vecino para ver si con los colores que tengo me alcanza o no*/
-
-      while(ColorVecino(j, i, G) == Color(i, G)) {
-        if (free_color != -1u) { //si tengo un color libre pinto con ese color
-          FijarColor(color[free_color], i, G);
-          used[free_color] = 1;
-          continue;
-          /* no tengo colores libres, genero uno nuevo */
-        }else{ 
-          cantidad_colores += 1;
-          color = realloc(color, sizeof(u32) * cantidad_colores);
-          color[cantidad_colores-1] = cantidad_colores-1u;
-          FijarColor(color[cantidad_colores-1u], i, G);
-          used[color[cantidad_colores-1u]] = 1;
-        }
-      }
-    }
-    for(u32 count = 0; count < cantidad_colores; count++)
-    	used[count] = 0;
-    used[Color(i,G)] = 1;
+  	colores_vecinos = calloc(Grado(i, G), sizeof(u32));
+	 	for (u32 j = 0; j < Grado(i, G); j++){
+	 		colores_vecinos[j] = ColorVecino(j, i, G);
+	  }
+	 	color_minimo = BuscarMinNoUsado(colores_vecinos, Grado(i, G), cantidad_colores);
+ 		if(!IsIn(color_minimo, colores, cantidad_colores)){
+			cantidad_colores += 1;
+			colores[cantidad_colores - 1u] = color_minimo;
+		}
+ 		FijarColor(color_minimo, i, G);
+  	free(colores_vecinos);
   }
-
+  free(colores);
   return cantidad_colores;
 }
+
+
+
+/* funciones sobre CC*/
+
+
