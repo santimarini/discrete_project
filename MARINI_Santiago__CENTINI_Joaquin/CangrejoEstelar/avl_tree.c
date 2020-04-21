@@ -18,7 +18,7 @@ u32 max(u32 a, u32 b){
 
 Node new_Node(Vertice vert) { 
   Node node = (Node) calloc(1, sizeof(struct __node));
-  assert(node != NULL);
+  assert(node != NULL && vert != NULL);
   node->key = vert->nombre;
   node->vert = vert;
   node->left = NULL;
@@ -62,9 +62,10 @@ int get_BalanceFactor(Node N){
 
 Node insert(Node node, Vertice v){
   /* 1.  Perform the normal BST rotation */
-  if (node == NULL)
-    return(new_Node(v));
-
+  if (node == NULL){
+  	node = new_Node(v);
+    return(node);
+  }
   if (v->nombre < node->key)
     node->left  = insert(node->left, v);
   else if (v->nombre > node->key)
@@ -132,18 +133,19 @@ Node delete_Node(Node root, u32 key) {
         temp = root;
         root = NULL;
       }else{
-        *root = *temp; 
-        free(temp); 
+        *root = *temp;
+        free(temp);
       }
 
-      }else{
-        Node temp = min_ValueNode(root->right); 
-        root->key = temp->key; 
-        root->right = delete_Node(root->right, temp->key); 
-      }
+    }else{
+      Node temp = min_ValueNode(root->right); 
+      root->key = temp->key; 
+      root->right = delete_Node(root->right, temp->key); 
+    }    
   } 
   if (root == NULL) 
-  return root; 
+    return root; 
+
 
   root->height = 1 + max(height(root->left), height(root->right));
 
@@ -166,6 +168,7 @@ Node delete_Node(Node root, u32 key) {
       return left_Rotate(root);
     }
   }
+
   return root; 
 } 
 
@@ -210,11 +213,11 @@ void print_PreOrder(Node root){
 } 
 
 void tree_Destroy(Node root){
- if (!root)
-    return;
+ if (root == NULL) return;
 
   tree_Destroy(root->left);
   tree_Destroy(root->right);
-
-  root = delete_Node(root, root->key);
+ 	root = delete_Node(root, root->key);
+  
+  root = NULL;
 }
