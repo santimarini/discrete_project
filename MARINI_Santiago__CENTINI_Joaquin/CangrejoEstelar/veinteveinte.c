@@ -197,7 +197,7 @@ static u32 BuscarMinNoUsado(u32 *array, u32 N, u32 cantidad_colores){
 		}
 	}
   if(cantidad_colores != N)
-	 cantidad_colores -= 0;
+	 cantidad_colores = N;
 
   return cantidad_colores;
 }
