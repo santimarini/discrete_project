@@ -1,6 +1,5 @@
 #ifndef __vv_H
 #define __vv_H
-#define FILE_LINE_MAX_SIZE 97
 
 #include <stdio.h>
 #include <stdlib.h>
