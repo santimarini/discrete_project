@@ -1,20 +1,18 @@
-#include "GrafoSt2020.h"
+#ifndef _PILA_H
+#define _PILA_H
 
-typedef struct elemento{
-    u32 vertice;
-    u32 indice;
-    struct elemento* siguiente;
+typedef struct elemento {
+  u32 vertice;
+  u32 indice;
+  struct elemento *siguiente;
 } Elemento;
 
-typedef struct pila{
-    Elemento* cima;
-    u32 longitud;
-}Pila;
+typedef struct pila {
+  Elemento *cima;
+  u32 longitud;
+} Pila;
 
-
-
-
-
+// funciones sobre pila
 Pila *CrearPila();
 void DestruirPila(Pila* pila);
 Elemento *CrearElemento(u32 v);
@@ -25,3 +23,6 @@ u32 Cima(Pila *pila);
 u32 IndiceCima(Pila *pila);
 u32 Longitud(Pila *pila);
 int EstaVacia(Pila *pila);
+
+
+#endif
